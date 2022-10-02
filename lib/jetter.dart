@@ -3,20 +3,21 @@ import 'dart:html';
 
 import 'package:meta/meta.dart';
 
-mixin BuildContext {}
+mixin BuildContext {
+  T? find<T>({bool listen = true});
+}
 
-abstract class StatefulWidget<T extends State<StatefulWidget<T>>>
-    extends Widget {
-  T get state;
+abstract class StatefulWidget extends Widget {
+  State get state;
   @override
   Element get element => StatefulElement(this);
 }
 
-class StatefulElement<S extends State<StatefulWidget<S>>>
+class StatefulElement<S extends State<StatefulWidget>>
     extends ComponentElement {
   final State state;
 
-  StatefulElement(StatefulWidget<S> statefulWidget)
+  StatefulElement(StatefulWidget statefulWidget)
       : state = statefulWidget.state,
         super(statefulWidget) {
     state
@@ -68,10 +69,20 @@ mixin DebugInfo {
   String get infoString => [runtimeType, info].toString();
 }
 
-abstract class Element with BuildContext, DebugInfo {
+abstract class Element with BuildContext, DebugInfo implements BuildContext {
   Widget widget;
   Element(this.widget);
   Element? _parent;
+
+  static final buildEvents = StreamController<String>();
+
+  @override
+  T? find<T>({bool listen = true}) {
+    if (this is StashElement<T>) {
+      return (widget as Stash<T>).data;
+    }
+    return _parent?.find<T>();
+  }
 
   void get logHtml => rootHtml?.log;
   String? get rootHtml => root?.html;
@@ -97,6 +108,7 @@ abstract class Element with BuildContext, DebugInfo {
   }
 
   void rebuild() {
+    buildEvents.add(widget.runtimeType.toString());
     performRebuild();
   }
 
@@ -117,17 +129,16 @@ abstract class Element with BuildContext, DebugInfo {
   }
 }
 
-abstract class State<T extends StatefulWidget<State<T>>> {
-  final T widget;
+abstract class State<T extends StatefulWidget> {
   Element? _element;
+
+  T get widget => _element?.widget as T;
 
   @mustCallSuper
   void initState(BuildContext context) {}
 
   @mustCallSuper
   void dispose(BuildContext context) {}
-
-  State(this.widget);
 
   Widget build(BuildContext context);
 
@@ -277,6 +288,24 @@ class RenderObjectElement extends Element {
         .nullZipWith(oldChildren, (n, o) => updateChild(o, n))
         .toList();
   }
+}
+
+typedef Builder = Widget Function(BuildContext context);
+
+class Stash<T> extends Widget {
+  final Builder builder;
+  final T data;
+
+  Stash(this.data, this.builder);
+  @override
+  Element get element => StashElement<T>(this);
+}
+
+class StashElement<T> extends ComponentElement {
+  StashElement(super.widget);
+
+  @override
+  Widget build() => (widget as Stash).builder(this);
 }
 
 void runApp(Widget app) =>
