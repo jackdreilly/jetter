@@ -1,0 +1,7 @@
+version: '3'
+
+tasks:
+  serve: |-
+    cd example
+    webdev serve
+    
