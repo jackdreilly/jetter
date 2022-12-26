@@ -1,5 +1,8 @@
 export 'src/foundation/jetter.dart';
+export 'src/firejet/firejet.dart';
+export 'src/firejet/jetauth.dart';
 export 'src/widgets/base.dart';
+export 'src/widgets/file_picker.dart';
 export 'src/widgets/builder.dart';
 export 'src/widgets/button.dart';
 export 'src/widgets/center.dart';
@@ -13,7 +16,6 @@ export 'src/widgets/jet.dart';
 export 'src/widgets/media_query.dart';
 export 'src/widgets/navigator.dart';
 export 'src/widgets/padding.dart';
-export 'src/widgets/provider.dart';
 export 'src/widgets/proxy_widget.dart';
 export 'src/widgets/router.dart';
 export 'src/widgets/row.dart';

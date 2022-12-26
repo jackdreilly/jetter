@@ -4,10 +4,13 @@ import 'package:jetter/jetter.dart';
 
 class StreamBuilder<T> extends StatefulWidget {
   final Function(BuildContext context, T value) builder;
-  final Stream<T> stream;
+  final Stream<T> Function(BuildContext context) create;
   final T initialValue;
 
-  StreamBuilder(this.builder, this.stream, this.initialValue);
+  StreamBuilder(
+      {required this.builder,
+      required this.create,
+      required this.initialValue});
   @override
   StreamBuilderState<T> get state => StreamBuilderState();
 }
@@ -21,7 +24,7 @@ class StreamBuilderState<T> extends State<StreamBuilder<T>> {
     super.initState(context);
     value = widget.initialValue;
     subscription =
-        widget.stream.listen((event) => setState(() => value = event));
+        widget.create(context).listen((event) => setState(() => value = event));
   }
 
   @override

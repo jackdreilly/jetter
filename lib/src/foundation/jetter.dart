@@ -377,8 +377,8 @@ class StashElement<T> extends ComponentElement {
   Widget build() => (widget as Stash).child;
 
   void add(Element element) {
-    dependencies.add(this);
-    // element.cleanups.add(() => dependencies.remove(this));
+    dependencies.add(element);
+    element.cleanups.add(() => dependencies.remove(element));
   }
 }
 
